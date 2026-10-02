@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isBusinessOwner(businessId) {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerId == request.auth.uid
+      );
+    }
+
+    function isBusinessMember(businessId) {
+      return isSignedIn() && (
+        isBusinessOwner(businessId) ||
+        exists(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid))
+      );
+    }
+
+    // User profiles collection
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isOwner(userId) && request.resource.data.id == userId;
+      allow delete: if false;
+    }
+
+    // Businesses collection & workspaces
+    match /businesses/{businessId} {
+      allow get: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid ||
+        exists(/databases/$(database)/documents/businesses/$(businessId)/members/$(request.auth.uid))
+      );
+
+      allow list: if isSignedIn() && (
+        resource.data.ownerId == request.auth.uid
+      );
+
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+
+      // Subcollections
+      match /members/{memberId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /googleConnections/{connectionId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessOwner(businessId);
+      }
+
+      match /reviews/{reviewId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessMember(businessId);
+      }
+
+      match /posts/{postId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessMember(businessId);
+      }
+
+      match /offers/{offerId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessMember(businessId);
+      }
+
+      match /services/{serviceId} {
+        allow read: if isBusinessMember(businessId);
+        allow write: if isBusinessMember(businessId);
+      }
+
+      match /activity/{activityId} {
+        allow read: if isBusinessMember(businessId);
+        allow create: if isBusinessMember(businessId);
+        allow update, delete: if false;
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Store Automation - Cross-Platform Google Sign-In & Business Profile",
+  "description": "Unified Google Sign-In authentication across Web, Android, and iOS for Store Automation, with separated Google Business Profile authorization, account linking, and automated verification suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

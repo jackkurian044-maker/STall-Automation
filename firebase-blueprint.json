@@ -1,0 +1,171 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Store Automation User Profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "name": { "type": "string", "maxLength": 128 },
+        "avatarUrl": { "type": "string", "maxLength": 1024 },
+        "role": { "type": "string", "enum": ["owner", "manager", "staff"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "name", "role", "createdAt"]
+    },
+    "Business": {
+      "title": "Business",
+      "description": "Business Store Workspace",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 256 },
+        "primaryCategory": { "type": "string", "maxLength": 128 },
+        "address": { "type": "string", "maxLength": 512 },
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "ownerId", "createdAt"]
+    },
+    "Member": {
+      "title": "Member",
+      "description": "Business team member and permissions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "role": { "type": "string", "enum": ["owner", "manager", "staff"] },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email", "role", "addedAt"]
+    },
+    "GoogleConnection": {
+      "title": "GoogleConnection",
+      "description": "Google Business Profile connection metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "accountId": { "type": "string", "maxLength": 128 },
+        "accountName": { "type": "string", "maxLength": 256 },
+        "locationId": { "type": "string", "maxLength": 128 },
+        "locationName": { "type": "string", "maxLength": 256 },
+        "status": { "type": "string", "enum": ["connected", "disconnected", "pending"] },
+        "authorizedAt": { "type": "string", "format": "date-time" },
+        "scopes": { "type": "string", "maxLength": 512 }
+      },
+      "required": ["id", "status", "authorizedAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Google Maps & Search customer review",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "authorName": { "type": "string", "maxLength": 128 },
+        "authorPhotoUrl": { "type": "string", "maxLength": 1024 },
+        "rating": { "type": "integer" },
+        "comment": { "type": "string", "maxLength": 4096 },
+        "createTime": { "type": "string", "format": "date-time" },
+        "replyText": { "type": "string", "maxLength": 4096 },
+        "replyTime": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "replied", "flagged"] }
+      },
+      "required": ["id", "authorName", "rating", "comment", "status"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Google Business Profile promotional or update post",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 256 },
+        "summary": { "type": "string", "maxLength": 4096 },
+        "callToAction": { "type": "string", "enum": ["ORDER_ONLINE", "LEARN_MORE", "CALL_NOW", "SIGN_UP"] },
+        "actionUrl": { "type": "string", "maxLength": 1024 },
+        "status": { "type": "string", "enum": ["draft", "scheduled", "published"] },
+        "createTime": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "summary", "status", "createTime"]
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "Promotional incentive or coupon",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 256 },
+        "couponCode": { "type": "string", "maxLength": 64 },
+        "discount": { "type": "string", "maxLength": 128 },
+        "validThrough": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "expired"] }
+      },
+      "required": ["id", "title", "couponCode", "discount", "status"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Store service item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 256 },
+        "description": { "type": "string", "maxLength": 2048 },
+        "price": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "name", "price"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "Audit event log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "action": { "type": "string", "maxLength": 128 },
+        "details": { "type": "string", "maxLength": 2048 },
+        "actorEmail": { "type": "string", "maxLength": 256 },
+        "platform": { "type": "string", "maxLength": 32 }
+      },
+      "required": ["id", "timestamp", "action", "actorEmail"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/businesses/{businessId}": {
+      "schema": { "$ref": "#/entities/Business" },
+      "description": "Store Automation workspaces"
+    },
+    "/businesses/{businessId}/members/{userId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Business team members and roles"
+    },
+    "/businesses/{businessId}/googleConnections/{connectionId}": {
+      "schema": { "$ref": "#/entities/GoogleConnection" },
+      "description": "Google Business Profile connection metadata"
+    },
+    "/businesses/{businessId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer reviews and replies"
+    },
+    "/businesses/{businessId}/posts/{postId}": {
+      "schema": { "$ref": "#/entities/Post" },
+      "description": "Google Business posts and announcements"
+    },
+    "/businesses/{businessId}/offers/{offerId}": {
+      "schema": { "$ref": "#/entities/Offer" },
+      "description": "Promotional deals and coupons"
+    },
+    "/businesses/{businessId}/services/{serviceId}": {
+      "schema": { "$ref": "#/entities/Service" },
+      "description": "Store services catalog"
+    },
+    "/businesses/{businessId}/activity/{activityId}": {
+      "schema": { "$ref": "#/entities/Activity" },
+      "description": "Audit trail logs"
+    }
+  }
+}
